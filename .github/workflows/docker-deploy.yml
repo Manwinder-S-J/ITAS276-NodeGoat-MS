@@ -36,16 +36,12 @@ jobs:
           name: semgrep-sarif-report
           path: semgrep.sarif
 
-    - name: Run Snyk to check for vulnerabilities
+    - name: Run Snyk to check Docker image for vulnerabilities
       uses: snyk/actions/docker@master
+      with:
+        image: myusername/myapp:latest
+        args: --file=Dockerfile --sarif-file-output=snyk.sarif
       env:
         SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-      with:
-        image: manwinderj/nodegoat:latest
-        args: --file=Dockerfile --sarif-file-output=snyk.sarif
-    - name: Upload Snyk SARIF report
-      uses: github/codeql-action/upload-sarif@v1
-      with:
-        sarif_file: snyk.sarif
 
 
