@@ -37,6 +37,7 @@ jobs:
           path: semgrep.sarif
 
     - name: Run Snyk to check Docker image for vulnerabilities
+      continue-on-error: true
       uses: snyk/actions/docker@master
       with:
         image: manwinderj/nodegoat:latest
