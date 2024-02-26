@@ -26,10 +26,10 @@ jobs:
     
     - name: Run Semgrep
       run: |
-          docker run --rm -v ${{ github.workspace }}:/src returntocorp/semgrep \
-          --config="p/r2c-ci" \
-          --sarif --output semgrep.sarif \
-          /src
+        docker run --rm -v ${{ github.workspace }}:/src returntocorp/semgrep semgrep \
+        --config="p/r2c-ci" \
+        --sarif --output /src/semgrep.sarif \
+        /src
     - name: Upload Semgrep SARIF report
       uses: actions/upload-artifact@v2
       with:
@@ -47,5 +47,5 @@ jobs:
       uses: github/codeql-action/upload-sarif@v1
       with:
         sarif_file: snyk.sarif
-        
+
 
