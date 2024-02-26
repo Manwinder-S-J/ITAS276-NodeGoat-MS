@@ -39,9 +39,7 @@ jobs:
     - name: Run Snyk to check Docker image for vulnerabilities
       uses: snyk/actions/docker@master
       with:
-        image: myusername/myapp:latest
+        image: manwinderj/myapp:latest
         args: --file=Dockerfile --sarif-file-output=snyk.sarif
       env:
         SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-
-
