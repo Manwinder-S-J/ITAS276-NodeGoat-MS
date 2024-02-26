@@ -25,3 +25,28 @@ jobs:
         file: ./Dockerfile
         push: true
         tags: manwinderj/nodegoat:latest
+    
+    - name: Run Semgrep
+      run: |
+          docker run --rm -v ${{ github.workspace }}:/src returntocorp/semgrep \
+          --config="p/r2c-ci" \
+          --sarif --output semgrep.sarif \
+          /src
+    - name: Upload Semgrep SARIF report
+      uses: actions/upload-artifact@v2
+      with:
+          name: semgrep-sarif-report
+          path: semgrep.sarif
+
+    - name: Run Snyk to check for vulnerabilities
+      uses: snyk/actions/docker@master
+      env:
+        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      with:
+        image: manwinderj/nodegoat:latest
+        args: --file=Dockerfile --sarif-file-output=snyk.sarif
+    - name: Upload Snyk SARIF report
+      uses: github/codeql-action/upload-sarif@v1
+      with:
+        sarif_file: snyk.sarif
+
