@@ -50,10 +50,11 @@ jobs:
     needs: trufflehog_scan
     steps:
       - name: Run Semgrep
-        uses: docker://returntocorp/semgrep
-        with:
-          args: "--config='p/r2c-ci' --sarif --output /github/workspace/semgrep.sarif /github/workspace"
-
+        run: |
+          docker run --rm -v ${{ github.workspace }}:/src returntocorp/semgrep semgrep \
+          --config="p/r2c-ci" \
+          --sarif --output /src/semgrep.sarif \
+          /src
       - name: Upload Semgrep SARIF report
         uses: actions/upload-artifact@v2
         with:
