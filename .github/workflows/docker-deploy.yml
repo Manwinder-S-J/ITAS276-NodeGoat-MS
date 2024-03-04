@@ -25,7 +25,7 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: manwinderj/nodegoat:latest 
+          tags: manwinderj/nodegoat:latest
 
   trufflehog_scan:
     runs-on: ubuntu-latest
@@ -68,7 +68,7 @@ jobs:
       - uses: actions/checkout@v2
       
       - name: Build a Docker image
-        run: docker build -t manwinderj/nodegoat:latest
+        run: docker build -t manwinderj/nodegoat:latest .
       
       - name: Run Snyk to check Docker image for vulnerabilities
         continue-on-error: true
