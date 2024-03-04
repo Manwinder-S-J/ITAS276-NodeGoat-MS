@@ -59,7 +59,9 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: semgrep-sarif-report
-          path: /github/workspace/semgrep.sarif
+          path: semgrep.sarif
+
+  
   snyk_scan:
     runs-on: ubuntu-latest
     needs: [trufflehog_scan, semgrep_scan]
