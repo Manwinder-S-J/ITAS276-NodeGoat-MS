@@ -25,3 +25,5 @@ jobs:
 
       - name: Run the application
         run: docker-compose up -d
+
+        
