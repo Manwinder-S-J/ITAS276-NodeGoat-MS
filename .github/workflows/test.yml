@@ -1,10 +1,7 @@
 name: Build docker image and deploy to wmd docker servers
 
 on:
-  push:
-    branches: [ "master" ]
-  pull_request:
-    branches: [ "master" ]
+  workflow_dispatch:
 
 jobs:
   deploy:
