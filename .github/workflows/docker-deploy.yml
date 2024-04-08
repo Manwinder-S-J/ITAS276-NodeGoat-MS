@@ -31,7 +31,7 @@ jobs:
         with:
           scanArguments: "--format sarif --output trufflehog-report.sarif"
       - name: Upload SARIF report
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: trufflehog-sarif-report
           path: trufflehog-report.sarif
@@ -48,7 +48,7 @@ jobs:
           --sarif --output /src/semgrep.sarif \
           /src
       - name: Upload Semgrep SARIF report
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: semgrep-sarif-report
           path: semgrep.sarif
@@ -75,7 +75,7 @@ jobs:
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
       - name: Upload SARIF report as an artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: snyk.sarif
           path: snyk.sarif
