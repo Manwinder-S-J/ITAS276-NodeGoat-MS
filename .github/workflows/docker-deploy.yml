@@ -7,57 +7,42 @@ on:
     branches: [ "master" ]
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out the repository
-        uses: actions/checkout@v2
-
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v1
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v2
-        with:
-          context: .
-          file: ./Dockerfile
-          push: true
-          tags: manwinderj/nodegoat:latest
-
   Discord-Begin:
     runs-on: ubuntu-latest
     steps:
       - name: Discord Notification start
         uses: tsickert/discord-webhook@v5.3.0
         with:
-            webhook-url: ${{ secrets.DISCORD_WEBHOOK }}
-            username: ${{github.repository}}
-            avatar-url: https://gravatar.com/avatar/be5d3fe06696117c467f199ddb4f1aed?s=400&d=robohash&r=g
-            embed-title: "Security Pipeline jobs are starting..."
-            embed-url: "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-            embed-description: "[Action details ${{ github.run_id }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})"
-            embed-author-name: "${{ github.triggering_actor }}"
+          webhook-url: ${{ secrets.DISCORD_WEBHOOK }}
+          username: ${{ github.repository }}
+          avatar-url: https://gravatar.com/avatar/be5d3fe06696117c467f199ddb4f1aed?s=400&d=robohash&r=g
+          embed-title: "Security Pipeline jobs are starting..."
+          embed-url: "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          embed-description: "[Action details ${{ github.run_id }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})"
+          embed-author-name: "${{ github.triggering_actor }}"
 
   trufflehog_scan:
     runs-on: ubuntu-latest
-    needs: build
     steps:
       - name: Check out code
         uses: actions/checkout@v3
-        
       - name: TruffleHog Action
         uses: trufflesecurity/trufflehog@v3.0.1
         with:
           scanArguments: "--format sarif --output trufflehog-report.sarif"
-        
       - name: Upload SARIF report
         uses: actions/upload-artifact@v2
         with:
           name: trufflehog-sarif-report
           path: trufflehog-report.sarif
+      - name: Discord Notification for TruffleHog Scan Completion
+        uses: tsickert/discord-webhook@v5.3.0
+        with:
+          webhook-url: ${{ secrets.DISCORD_WEBHOOK }}
+          username: ${{ github.repository }}
+          avatar-url: https://gravatar.com/avatar/be5d3fe06696117c467f199ddb4f1aed?s=400&d=robohash&r=g
+          embed-title: "SAST-TruffleHog completed!"
+          embed-description: "Uploaded: trufflehog-sarif-report"
 
   semgrep_scan:
     runs-on: ubuntu-latest
@@ -74,17 +59,20 @@ jobs:
         with:
           name: semgrep-sarif-report
           path: semgrep.sarif
+      - name: Discord Notification for Semgrep Scan Completion
+        uses: tsickert/discord-webhook@v5.3.0
+        with:
+          webhook-url: ${{ secrets.DISCORD_WEBHOOK }}
+          username: ${{ github.repository }}
+          avatar-url: https://gravatar.com/avatar/be5d3fe06696117c467f199ddb4f1aed?s=400&d=robohash&r=g
+          embed-title: "SAST-Semgrep completed!"
+          embed-description: "Uploaded: semgrep-sarif-report"
 
-  
   snyk_scan:
     runs-on: ubuntu-latest
-    needs: [trufflehog_scan, semgrep_scan]
+    needs: semgrep_scan
     steps:
       - uses: actions/checkout@v2
-      
-      - name: Build a Docker image
-        run: docker build -t manwinderj/nodegoat:latest .
-      
       - name: Run Snyk to check Docker image for vulnerabilities
         continue-on-error: true
         uses: snyk/actions/docker@master
@@ -93,10 +81,43 @@ jobs:
           args: --file=Dockerfile --sarif-file-output=snyk.sarif
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-          
       - name: Upload SARIF report as an artifact
         uses: actions/upload-artifact@v2
         with:
           name: snyk.sarif
           path: snyk.sarif
+      - name: Discord Notification for Snyk Scan Completion
+        uses: tsickert/discord-webhook@v5.3.0
+        with:
+          webhook-url: ${{ secrets.DISCORD_WEBHOOK }}
+          username: ${{ github.repository }}
+          avatar-url: https://gravatar.com/avatar/be5d3fe06696117c467f199ddb4f1aed?s=400&d=robohash&r=g
+          embed-title: "SCA-Snyk completed!"
+          embed-description: "Uploaded: snyk.sarif"
 
+  build:
+    runs-on: ubuntu-latest
+    needs: snyk_scan
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v2
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: manwinderj/nodegoat:latest
+      - name: Discord Notification for Pipeline Completion
+        uses: tsickert/discord-webhook@v5.3.0
+        with:
+          webhook-url: ${{ secrets.DISCORD_WEBHOOK }}
+          username: ${{ github.repository }}
+          avatar-url: https://gravatar.com/avatar/be5d3fe06696117c467f199ddb4f1aed?s=400&d=robohash&r=g
+          embed-title: "Security Pipeline jobs completed!"
+          embed-description: "The build and push process has finished successfully."
