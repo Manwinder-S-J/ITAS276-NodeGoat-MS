@@ -35,14 +35,7 @@ jobs:
         with:
           name: trufflehog-sarif-report
           path: trufflehog-report.sarif
-      - name: Discord Notification for TruffleHog Scan Completion
-        uses: tsickert/discord-webhook@v5.3.0
-        with:
-          webhook-url: ${{ secrets.DISCORD_WEBHOOK }}
-          username: ${{ github.repository }}
-          avatar-url: https://gravatar.com/avatar/be5d3fe06696117c467f199ddb4f1aed?s=400&d=robohash&r=g
-          embed-title: "SAST-TruffleHog completed!"
-          embed-description: "Uploaded: trufflehog-sarif-report"
+  
 
   semgrep_scan:
     runs-on: ubuntu-latest
@@ -66,7 +59,7 @@ jobs:
           username: ${{ github.repository }}
           avatar-url: https://gravatar.com/avatar/be5d3fe06696117c467f199ddb4f1aed?s=400&d=robohash&r=g
           embed-title: "SAST-Semgrep completed!"
-          embed-description: "Uploaded: semgrep-sarif-report"
+          embed-description: "[Action details ${{ github.run_id }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})\nUploaded: [semgrep-sarif-report.sarif](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})"
 
   snyk_scan:
     runs-on: ubuntu-latest
@@ -93,7 +86,7 @@ jobs:
           username: ${{ github.repository }}
           avatar-url: https://gravatar.com/avatar/be5d3fe06696117c467f199ddb4f1aed?s=400&d=robohash&r=g
           embed-title: "SCA-Snyk completed!"
-          embed-description: "Uploaded: snyk.sarif"
+          embed-description: "[Action details ${{ github.run_id }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})\nUploaded: [snyk.sarif](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})"
 
   build:
     runs-on: ubuntu-latest
@@ -120,4 +113,8 @@ jobs:
           username: ${{ github.repository }}
           avatar-url: https://gravatar.com/avatar/be5d3fe06696117c467f199ddb4f1aed?s=400&d=robohash&r=g
           embed-title: "Security Pipeline jobs completed!"
-          embed-description: "The build and push process has finished successfully."
+          embed-url: "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          embed-description: |
+            [Action details ${{ github.run_id }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+          embed-author-name: "${{ github.triggering_actor }}"
+          
